@@ -8,13 +8,17 @@ use App\Models\categoria;
 use App\Models\miembros;
 use App\Models\manchas;
 use App\Models\acumulado;
+use Illuminate\Support\Facades\Auth;
+use App\User;
 use File;
 use Storage;
+use Google;
+use Config;
 
 class FrontController extends Controller{
     //
     public function index(Request $request){
-        //Artisan::call('config:clear');
+        $id = Auth::id();
         $users   =   miembros::get_miembros_by_id(2);
         $grupo   =   categoria::get_categoria_first();
         return view ('front.v_home_mancha', [
@@ -24,11 +28,13 @@ class FrontController extends Controller{
     }
 
     public function categorias($seccion){
+        $id_usuario = Auth::id();
+        //var_dump($id);exit;
         $user = miembros::get_miembros_by_id(2);
-        $grupo = categoria::get_categoria_first();
+        $grupo = categoria::get_categoria_first($id_usuario);
     	switch ($seccion) {
 		    case 'familia':
-                $categorias           =   categoria::get_categorias();
+                $categorias           =   categoria::get_categorias($id_usuario);
                 $miembros             =   miembros::get_miembros(); 
                 $manchas              =   manchas::get_manchas();
                 return view ('front.v_home_categoria',[
@@ -50,6 +56,14 @@ class FrontController extends Controller{
             case 'beneficio':
                 $locations           =   "beneficio";
                 return view ('front.v_home_beneficio',[
+                    'beneficio'	=>	$locations,
+                    'user'  =>  $user,
+                    'grupo' =>  $grupo,
+                ]);
+            break;
+            case 'test':
+                $locations           =   "beneficio";
+                return view ('front.test',[
                     'beneficio'	=>	$locations,
                     'user'  =>  $user,
                     'grupo' =>  $grupo,

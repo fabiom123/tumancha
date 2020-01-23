@@ -26,12 +26,12 @@
           <div class="sidebar-header">
             <div class="d-flex align-items-center">
               <figure class="mr-2 mb-0" style="position: relative">
-                <img src="assets/images/miembros/{!! $user->imgUrl !!}" class="img-sm rounded-circle" alt="profile">
+                <img src="{{URL::asset('/uploads/usuario/'.Auth::user()->url_image)}}" class="img-sm rounded-circle" alt="profile">
                 <div class="status online"></div>
               </figure>
               <div>
-                <h6>{!! $user->nom !!}</h6>
-                <p class="text-muted tx-13">{!! $user->numero !!}</p>
+                <h6>{!! Auth::user()->name !!}</h6>
+                <p class="text-muted tx-13">{!! Auth::user()->telefono !!}</p>
               </div>
             </div>
             <div class="sidebar-toggler not-active">
@@ -93,16 +93,16 @@
                 <div class="collapse" id="emails">
                   <ul class="nav sub-menu">
                     <li class="nav-item">
-                      <a href="/familia" class="nav-link">Arma tu mancha</a>
+                      <a href="/familia" class="nav-link arma-tu-mancha">Arma tu mancha</a>
                     </li>
                     <li class="nav-item">
                       <a href="/Grupo" class="nav-link">Gestiona tus manchas</a>
                     </li>
                     <li class="nav-item">
-                      <a href="/beneficio-diario" class="nav-link">Beneficios diarios</a>
+                      <a href="/beneficio/persona/{!! Auth::user()->id !!}" class="nav-link">Beneficios diarios</a>
                     </li>
                     <li class="nav-item">
-                      <a href="/beneficio-mancha" class="nav-link">Beneficios Mancheros</a>
+                      <a href="beneficios/grupo" class="nav-link">Beneficios Mancheros</a>
                     </li>
                   </ul>
                 </div>
@@ -113,7 +113,7 @@
         <!-- end menu -->
         
         <!-- sidebar -->
-        <nav class="settings-sidebar">
+        <!--<nav class="settings-sidebar">
           <div class="sidebar-body">
             <a href="#" class="settings-sidebar-toggler">
               <i data-feather="settings"></i>
@@ -144,7 +144,7 @@
               </a>
             </div>
           </div>
-        </nav>
+        </nav>-->
         <!-- end sidebar -->
         
         <!-- home -->
@@ -389,5 +389,5 @@
     </div>
     @include('front.includes.script_home_mancha')   
 </body>
-@yield('javascripts')
+@yield('javascripts')   
 </html>

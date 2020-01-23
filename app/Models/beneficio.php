@@ -16,5 +16,15 @@ class beneficio extends Model{
     static public function get_miembros(){
         return DB::table('beneficios')
         ->get();
+    }
+    
+    static public function get_beneficio_meta(){
+        $beneficios = DB::table('beneficios')
+            ->join('metas', 'beneficios.id_beneficio', '=', 'metas.id_beneficio')
+            ->select('beneficios.*', 'metas.*')
+            //->where('miembros.id_categoria', '=', intval($categoria))
+            ->get();
+        return $beneficios;
     } 
+
 }

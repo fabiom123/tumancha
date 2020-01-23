@@ -12,55 +12,70 @@
 */
 Route::group(['middleware' => 'web'], function () {
 
-    Route::get('/','Front\FrontController@index');
+    Route::get('/login','Auth\LoginController@showLoginForm')->name('login');
+    Route::post('login', 'Auth\LoginController@loginUser');
+    Route::get('/logout','Auth\LoginController@logout')->name('logout');
+    // Registration Routes...
+    Route::get('register', 'Auth\RegisterController@showRegistrationForm')->name('register');
+    Route::post('register', 'Auth\RegisterController@register');
+    // Password Reset Routes...
+    Route::get('password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm');
+    Route::post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail');
+    Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm');
+    Route::post('password/reset', 'Auth\ResetPasswordController@reset');
+    //google contacs api 
     
-    Route::get('/{seccion}',['as' => 'categorias', 'uses' => 'Front\FrontController@categorias']);
 
-    Route::post('/categoria/store', 'Back\CategoriaController@store_categoria')->name('categoria_store_post');
-    
-    Route::post('/categoria/miembro', 'Back\CategoriaController@store_miembro')->name('miembro_store_post');
+    Route::group(['middleware' => 'auth'], function () {
 
-    Route::post('/categoria/contacto', 'Back\CategoriaController@store_contacto')->name('get_contacto_post');
+        Route::get('/','Front\FrontController@index');
+        
+        Route::get('/{seccion}',['as' => 'categorias', 'uses' => 'Front\FrontController@categorias']);
 
-    Route::post('/categoria/plan', 'Back\PlanController@get_plan_by_contacto')->name('get_plan_by_contacto');
+        Route::post('/categoria/store', 'Back\CategoriaController@store_categoria')->name('categoria_store_post');
+        
+        Route::post('/categoria/miembro', 'Back\CategoriaController@store_miembro')->name('miembro_store_post');
 
-    Route::post('/categoria/update-plan', 'Back\PlanController@update_plan_by_contacto')->name('update_plan_by_contacto');
+        Route::post('/categoria/contacto', 'Back\CategoriaController@store_contacto')->name('get_contacto_post');
 
-    //Clear Cache facade value:
-    Route::get('/clear-cache', function() {
-        $exitCode = Artisan::call('cache:clear');
-        return '<h1>Cache facade value cleared</h1>';
+        Route::post('/categoria/plan', 'Back\PlanController@get_plan_by_contacto')->name('get_plan_by_contacto');
+
+        Route::post('/categoria/update-plan', 'Back\PlanController@update_plan_by_contacto')->name('update_plan_by_contacto');
+
+        Route::get('beneficio/{tipo}/{grupo}',['as' => 'beneficio', 'uses' => 'Back\BeneficioController@show_beneficio']);
+
+        Route::get('beneficios/grupo',['as' => 'beneficio_grupo', 'uses' => 'Back\BeneficioController@show_beneficio_grupo']);
+
+        //Clear Cache facade value:
+        Route::get('/clear-cache', function() {
+            $exitCode = Artisan::call('cache:clear');
+            return '<h1>Cache facade value cleared</h1>';
+        });
+        //Reoptimized class loader:
+        Route::get('/optimize', function() {
+            $exitCode = Artisan::call('optimize');
+            return '<h1>Reoptimized class loader</h1>';
+        });
+        //Route cache:
+        Route::get('/route-cache', function() {
+            $exitCode = Artisan::call('route:cache');
+            return '<h1>Routes cached</h1>';
+        });
+        //Clear Route cache:
+        Route::get('/route-clear', function() {
+            $exitCode = Artisan::call('route:clear');
+            return '<h1>Route cache cleared</h1>';
+        });
+        //Clear View cache:
+        Route::get('/view-clear', function() {
+            $exitCode = Artisan::call('view:clear');
+            return '<h1>View cache cleared</h1>';
+        });
+        //Clear Config cache:
+        Route::get('/config-cache', function() {
+            $exitCode = Artisan::call('config:cache');
+            return '<h1>Clear Config cleared</h1>';
+        });
     });
 
-    //Reoptimized class loader:
-    Route::get('/optimize', function() {
-        $exitCode = Artisan::call('optimize');
-        return '<h1>Reoptimized class loader</h1>';
-    });
-
-    //Route cache:
-    Route::get('/route-cache', function() {
-        $exitCode = Artisan::call('route:cache');
-        return '<h1>Routes cached</h1>';
-    });
-
-    //Clear Route cache:
-    Route::get('/route-clear', function() {
-        $exitCode = Artisan::call('route:clear');
-        return '<h1>Route cache cleared</h1>';
-    });
-
-    //Clear View cache:
-    Route::get('/view-clear', function() {
-        $exitCode = Artisan::call('view:clear');
-        return '<h1>View cache cleared</h1>';
-    });
-
-    //Clear Config cache:
-    Route::get('/config-cache', function() {
-        $exitCode = Artisan::call('config:cache');
-        return '<h1>Clear Config cleared</h1>';
-    });
-    
-    
 });

@@ -1,9 +1,15 @@
 @extends('layout.home')
-
+@section('styles')
+<style>
+#dataTableGoogleCon > tbody > tr > td:nth-child(2){
+    width: 50vw;
+    max-width: 50vw;
+    word-break: break-all;
+    white-space: pre-line;
+}
+</style>
+@endsection
 @section('content')
-
-
-
 <div class="page-content categoria-mancha-container">
 
     <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -29,7 +35,7 @@
                     <form class="forms-sample" id="crear-categoria">
 
                         {{ csrf_field() }}
-
+                        <input type="hidden" name="id_usuario" value="{{ Auth::user()->id }}">
                         <div class="form-group">
 
                             <label for="tipo-categoria">Categoria</label>
@@ -90,8 +96,6 @@
 
     </div>
 
-
-
     <div class="modal fade" id="miembroModal" tabindex="-1" role="dialog" aria-labelledby="miembroModalLabel" aria-hidden="true">
 
         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -118,11 +122,20 @@
 
                         <input type="hidden" name="id_miembro" id="id_miembro">
 
-                        <table id="dataTableMiembros" class="table">
-
+                        <table id="dataTableGoogleCon" class="table">
+                            <thead>
+                            <tr>
+                                <th>Avatar</th>
+                                <th>Nombre</th>
+                                <th>opcion</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>    
                         </table>
 
                     </div>
+                    
 
                 </div>
 
@@ -137,8 +150,6 @@
         </div>
 
     </div>
-
-
 
     <div class="modal fade" id="beneficioModal" tabindex="-1" role="dialog" aria-labelledby="miembroModalLabel" aria-hidden="true">
 
@@ -278,7 +289,7 @@
 
         <?php foreach ($categorias as $categoria){?>
 
-        <div class="card-body" id="mancha{!! $categoria->id_categoria !!}">
+        <div class="card-body container-miembros" id="mancha{!! $categoria->id_categoria !!}">
 
             <div class="d-flex justify-content-between align-items-baseline mb-3">
 
@@ -310,7 +321,7 @@
 
                         <div class="mr-3">
 
-                        <img src="assets/images/miembros/{!! $mancha->avatar !!}" class="rounded-circle avatar-mancha" alt="user">
+                        <img src="uploads/usuario/{!! $mancha->avatar !!}" class="rounded-circle avatar-mancha" alt="user">
 
                         </div>
 
@@ -320,7 +331,7 @@
 
                             <h6 class="text-body mb-2">{!! $mancha->nombre !!}</h6>
 
-                            <p class="text-muted tx-12 mancha-miembro-menu" data-toggle="modal" data-target="#beneficioModal" data-nombre="{!! $mancha->nombre !!}" data-avatar="{!! $mancha->avatar !!}" data-id="{!! $mancha->id_contacto !!}"><i data-feather="more-horizontal"></i></p>
+                            <p class="text-muted tx-12 mancha-miembro-menu" data-toggle="modal" data-target="#beneficioModal" data-nombre="{!! $mancha->nombre !!}" data-avatar="{!! $mancha->avatar !!}" data-id="{!! $mancha->id_contacto !!}" data-google="{!! $mancha->id_google !!}"><i data-feather="more-horizontal"></i></p>
 
                         </div>
 
@@ -337,30 +348,6 @@
                 } 
 
                 ?>
-                <!--<a href="#" class="d-flex align-items-center border-bottom py-3">
-
-                    <div class="mr-3">
-
-                    <img src="../assets/images/faces/face3.jpg" class="rounded-circle avatar-mancha" alt="user">
-
-                    </div>
-
-                    <div class="w-100">
-
-                    <div class="d-flex justify-content-between">
-
-                        <h6 class="text-body mb-2">Carl Henson</h6>
-
-                        <p class="text-muted tx-12 mancha-miembro-menu"><i data-feather="more-horizontal"></i></p>
-
-                    </div>
-
-                    <p class="text-muted tx-13">I've finished it! See you so..</p>
-
-                    </div>
-
-                </a>-->
-
             </div>
 
         </div>
@@ -368,10 +355,10 @@
         <?php } ?>
 
     </div>
-
+    
     <div class="beneficio-mancha-cat">   
         <input type="hidden" name="id_cat_grupo" value="{!! $grupo->id_categoria !!}">
-        <a href="/beneficio/{!! $grupo->id_categoria !!}" type="button" class="btn btn-primary btn-icon-text beneficio-mancha-button">
+        <a href="/beneficio/grupo/{!! $grupo->id_categoria !!}" type="button" class="btn btn-primary btn-icon-text beneficio-mancha-button">
             <img src="assets/images/mancha/cup.png" width="40" height="40" class="d-inline-block align-top" alt="">
             <p>Beneficios</p>
         </a>
@@ -379,18 +366,79 @@
 
 </div>
 
-
-
+<button disabled="disabled" class="display-contacts"></button>
 @endsection
-
 @section('javascripts')
-
 <script>
-
+$('#miembroModal').on('show.bs.modal', function(e) {  
+    var id_grupo = $(e.relatedTarget).data('id');
+    var render_data_table ='<table id="dataTableGoogleCon" class="table"><thead><tr><th>Avatar</th><th>Nombre</th><th>opcion</th></tr></thead><tbody></tbody></table>';
+    $('.table-responsive').html(render_data_table);
+    $('.display-contacts').click();
+    setTimeout(function(){ 
+        $('.add-miembro').on('click',function(e){
+            var avatar = $(this).data('avatar');
+            fetch(avatar)
+                .then(res => res.blob())
+                .then(blob => {
+                const nombre = $(this).data('nombre');    
+                const img_name = nombre.replace(/ /g, "");
+                const file = new File([blob], img_name+'.png', blob);
+                const id_con = $(this).data('id');
+                const id_cat = parseInt(id_grupo);
+                data = new FormData();
+                    data.append( 'avatar',  file );
+                    data.append( 'nombre',  nombre );
+                    data.append( 'id_google', id_con );
+                    data.append( 'id_categoria', parseInt(id_cat) );
+                //console.log(data);    
+                addMiembro(data);
+            });
+            //$('#dataTableMiembros thead').remove();
+            //$('#dataTableMiembros tbody').remove();
+            //addMiembro(nombre, avatar, id_cat, id_con);
+            $(this).removeClass('add-miembro');
+            $(this).find('svg').remove();
+            $(this).append('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-circle icon-lg text-muted pb-3px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>');
+        });
+        $('#dataTableGoogleCon').DataTable({
+            "paging":   false,
+            "ordering": false,
+            "info":     false,
+            "scrollY":  "40vh",
+            "scrollCollapse": true,
+            "paging":         false
+        });
+        //getMiembroNotContact();
+        $("#dataTableGoogleCon tbody").find(".add-miembro").each(function(){
+            //console.log($(this).attr('data-id')); 
+            var google_contact = $(this).attr('data-id');
+            var google_item = $(this);
+            $("#mancha"+id_grupo).find(".mancha-miembro-menu").each(function(){
+                var miembro_contact = $(this).attr('data-google');
+                if(google_contact == miembro_contact){  
+                    $(google_item).removeClass('add-miembro');
+                    $(google_item).off('click'); 
+                    $(google_item).find('svg').remove();
+                    $(google_item).append('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-circle icon-lg text-muted pb-3px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>');
+                }
+                //temp.push(txt);
+            });
+        });
+    }, 4000);
+});    
+$('#miembroModal').on('hidden.bs.modal', function (e) {
+  // do something...
+  $("#dataTableGoogleCon").remove();
+  $("#dataTableGoogleCon_wrapper").remove();
+})
+$('.display-contacts').on('click',function(){
+    //if(window.location.pathname !== "/famlia"){
+    googleContConnet();
+    //}
+});  
 /******************* page interaction ****************************/
-
 // menu nav grupo  ->  miembros 
-
 $('.menu-cat-mancha .description-mancha').click(function() {
     // Display id grupo 
     var id_cat = $(this).data('id'); 
@@ -402,48 +450,23 @@ $('.menu-cat-mancha .description-mancha').click(function() {
     var contactBodyScroll = new PerfectScrollbar(currentTab+' .miembros-cat');
     $(currentTab).show();
     return false;
-
 });
-
 /************************* modal ******************************/
-
-$('#miembroModal').on('show.bs.modal', function(e) {
-
-    var id_miembro = $(e.relatedTarget).data('id');
-
-    $(e.currentTarget).find('input[name="id_miembro"]').val(id_miembro);
-
-    getListContbyCat(id_miembro);
-
-});
-
 $('#beneficioModal').on('show.bs.modal', function(e) {
-
     var id_contacto = $(e.relatedTarget).data('id');
-
     var nombre = $(e.relatedTarget).data('nombre');
-
     var avatar = $(e.relatedTarget).data('avatar');
-
     $(e.currentTarget).find('input[name="id_contacto"]').val(id_contacto);
-
     $(e.currentTarget).find('#beneficioModalLabel').text('Comparte con '+nombre+' y accede a más beneficios');
-
     $(e.currentTarget).find('#receptor-bene').text(nombre);
-
-    $(e.currentTarget).find('#beneficioModalAvatar').attr('src','assets/images/miembros/'+avatar);
-
+    $(e.currentTarget).find('#beneficioModalAvatar').attr('src','uploads/usuario/'+avatar);
     getPlanContacto(id_contacto);
-
 });
-
 /************************* data proccess **********************/
-
 $('#crear-categoria').submit(function(event){
     event.preventDefault();
     onCrate(this);
 });  
-
 function onCrate(e) {
 
     var data = new FormData($(e)[0]);
@@ -538,7 +561,7 @@ function onCrate(e) {
                     html2 +='<div class="w-100">';
                     html2 +='<div class="d-flex justify-content-between">';
                     html2 +='<h6 class="text-body mb-2">'+valor.nombre+'</h6>';
-                    html2 +=' <p class="text-muted tx-12 mancha-miembro-menu" data-toggle="modal" data-target="#beneficioModal" data-nombre="'+valor.nombre+'" data-avatar="'+valor.avatar+'" data-id="'+valor.id_contacto+'"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-horizontal"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></p>';
+                    html2 +=' <p class="text-muted tx-12 mancha-miembro-menu" data-toggle="modal" data-target="#beneficioModal" data-nombre="'+valor.nombre+'" data-avatar="'+valor.avatar+'" data-id="'+valor.id_contacto+'" data-google="'+valor.id_google+'"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-horizontal"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></p>';
                     html2 +='</div>';
                     html2 +='<p class="text-muted tx-13">Hey! there Im available...</p>';
                     html2 +='</div>';
@@ -572,91 +595,45 @@ function onCrate(e) {
     });
 
 }
-
-
-
-function addMiembro(nombre, avatar, id_cat, id_con){
-
+function addMiembro(data){
     $.ajax({
-
     url: "{{ route('miembro_store_post') }}",
-
     headers: {
-
-                'X-CSRF-TOKEN': $('input[name="_token"]').val()
-
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
-
     type: 'POST',
-
     dataType: 'json',
-
-    data:{ 
-
-        "nombre":nombre,
-
-        "avatar":avatar,
-
-        "id_contacto":id_con,
-
-        "id_categoria":id_cat
-
-    },
-
+    data:data,
+    processData: false,
+    contentType: false,
     beforeSend: function() {
-
-
-
     },
-
     success: function(data){ 
-
+      console.log(data.new_data);   
       //$('#miembroModal').modal('hide');
-
       var html = '';
-
       html += '<a href="#" class="d-flex align-items-center border-bottom py-3">';
-
       html += '<div class="mr-3">';
-
-      html += '<img src="assets/images/miembros/'+data.new_data.avatar+'" class="rounded-circle avatar-mancha" alt="user">';
-
-      html += '</div>';  
-
+      html += '<img src="uploads/usuario/'+data.new_data.avatar+'" class="rounded-circle avatar-mancha" alt="user">';
+      html += '</div>';   
       html += '<div class="w-100">';
-
       html += '<div class="d-flex justify-content-between">';
-
       html += '<h6 class="text-body mb-2">'+data.new_data.nombre+'</h6>'; 
-
-      html += '<p class="text-muted tx-12 mancha-miembro-menu" data-toggle="modal" data-target="#beneficioModal" data-nombre="'+data.new_data.nombre+'" data-avatar="'+data.new_data.avatar+'" data-id="'+data.new_data.id_contacto+'"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-horizontal"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></p>';                 
-
+      html += '<p class="text-muted tx-12 mancha-miembro-menu" data-toggle="modal" data-target="#beneficioModal" data-nombre="'+data.new_data.nombre+'" data-avatar="'+data.new_data.avatar+'" data-id="'+data.new_data.id_contacto+'" data-google="'+data.new_data.id_google+'"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-horizontal"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></p>';      
       html += '</div>';
-
       html += '<p class="text-muted tx-13">Hey! there Im available...</p>';
-
       html += '</div>';
-
       html += '</a>';
-
       var contendor = 'mancha'+data.new_data.id_categoria+' .miembros-cat';       
-
       $('#' + contendor).append(html);
 
     },
 
     error: function(data){
 
-
-
     }
-
     });
-
 }
-
-
-
 function getListContbyCat(categoria){
 
     $.ajax({
@@ -792,285 +769,130 @@ function getListContbyCat(categoria){
             $(this).append('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-circle icon-lg text-muted pb-3px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>');
 
         });
-
-
-
     },
-
     error: function(data){
-
-
-
     }
 
     });
 
 }
-
-
-
 function getPlanContacto(id_contacto){
-
     $.ajax({
-
         url: "{{ route('get_plan_by_contacto') }}",
-
         headers: {
-
                     'X-CSRF-TOKEN': $('input[name="_token"]').val()
-
                 },
-
         type: 'POST',
-
         dataType: 'json',
-
-        data:{ 
-
-            "id_contacto":id_contacto,
-
-        },
-
+        data:{"id_contacto":id_contacto},
         beforeSend: function() {
-
-
-
         },
-
         success: function(data){
-
             console.log(data.new_data);
-
             /* YO */
-
             var megas = data.me.megas;
-
             var porcentaje = megas * 100 / 1200;
-
             var maxcompartido =  70 / 100 * megas; // 70% de mi total de megas
-
             /* contacto */ 
-
             var megasMe = data.new_data.megas;
-
             var porcentajeMe = megas * 100 / 1200;
-
-
-
             var html = "";
-
             /*renderizar megas min sms de cliente */
-
             html += '<div id="planMe" class="mx-auto grafica-megas"><span class="progres-tipo">MB</span></div>';
-
             html += '<div id="planContacto" class="mx-auto grafica-megas"><span class="progres-tipo">MB</span></div>';
-
             html += '<div class="barra-gb">';
-
             html += '<input type="range" class="custom-range" name="rangeGbInput" id="ageInputId" value="'+Math.round(maxcompartido)+'" min="50" max="'+Math.round(maxcompartido)+'" oninput="ageOutputId.value = ageInputId.value">';
-
             html += '<p>Puedes compartir <output name="ageOutputName" id="ageOutputId">'+Math.round(maxcompartido)+'</output> MB</p>';
-
             html += '</div>';
-
             html += '<div class="progress-mancha">';
-
             html += '<button type="button" class="btn btn-primary" style="background: white;color: #000;letter-spacing: 1px;font-weight: 600;">Compartir</button>';
-
             html += '</div>';
-
-
-
-            $("#plan-contacto").html(html);    
-
-                                      
-
+            $("#plan-contacto").html(html);                          
             /*crear grafica*/
-
             if($('#planMe').length) {
-
                 var bar = new ProgressBar.Circle(planMe, {
-
                 color: '#fff',
-
                 trailColor: '#f58e5f',
-
-                // This has to be the same size as the maximum width to
-
-                // prevent clipping
-
                 strokeWidth: 4,
-
                 trailWidth: 3,
-
                 easing: 'easeInOut',
-
                 duration: 1400,
-
                 text: {
-
                     autoStyleContainer: false
-
                 },
-
                 from: { color: '#507ab5', width: 4 },
-
                 to: { color: '#f58e5f', width: 4 },
-
-                // Set default step function for all animate calls
-
                 step: function(state, circle) {
-
                     circle.path.setAttribute('stroke', state.color);
-
                     circle.path.setAttribute('stroke-width', state.width);
-
-                
-
                     var value = Math.round(circle.value() * 100);
-
                     if (value === 0) {
-
                         circle.setText('');
-
                     } else {
-
                     //circle.setText(value + '%');
-
                         circle.setText(megas);
-
                     }
-
                 }
-
                 });
 
                 bar.text.style.fontFamily = "'Overpass', sans-serif;";
-
                 bar.text.style.fontSize = '2rem';
-
-                
-
                 bar.animate('.'+Math.round(porcentaje));
-
             }
-
             /*end grafica*/
-
             /*crear grafica*/
-
             if($('#planContacto').length) {
-
                 var bar = new ProgressBar.Circle(planContacto, {
-
                 color: '#fff',
-
                 trailColor: '#f58e5f',
-
-                // This has to be the same size as the maximum width to
-
-                // prevent clipping
-
                 strokeWidth: 4,
-
                 trailWidth: 3,
-
                 easing: 'easeInOut',
-
                 duration: 1400,
-
                 text: {
-
                     autoStyleContainer: false
-
                 },
-
                 from: { color: '#507ab5', width: 4 },
-
                 to: { color: '#f58e5f', width: 4 },
-
-                // Set default step function for all animate calls
-
                 step: function(state, circle) {
-
                     circle.path.setAttribute('stroke', state.color);
-
                     circle.path.setAttribute('stroke-width', state.width);
-
-                
-
                     var value = Math.round(circle.value() * 100);
-
                     if (value === 0) {
-
                         circle.setText('');
-
                     } else {
-
                     //circle.setText(value + '%');
-
                         circle.setText(megasMe);
-
                     }
-
                 }
-
                 });
-
                 bar.text.style.fontFamily = "'Overpass', sans-serif;";
-
                 bar.text.style.fontSize = '2rem';
-
-                
-
                 bar.animate('.'+Math.round(porcentajeMe));
-
             }
-
             /*end grafica*/
-
             /*compartir beneficios*/
-
             $('.progress-mancha button').on('click', function(){
-
                 // id emisor: para este demo sere yo fabio
-
-                var id_emisor = 2;
-
+                var id_emisor =  {!! Auth::user()->id !!};
                 // id receptor
-
                 var id_receptor = $('input[name="id_contacto"]').val();
-
                 //cantidad de megas,minutos,etc: emisor - cantidad -> receptor + cantidad
-
                 var cantidad = $('input[name="rangeGbInput"]').val();
-
                 //tipo de beneficio a compartir 
-
                 var tipo = 'megas';
-
                 //acumulado de servicio para persona
-
-                var usuario = 2;
-
+                var usuario = {!! Auth::user()->id !!};
                 //acumulado de servicio para el grupo
-
                 var grupo = $('input[name="id_cat_grupo"]').val(); 
-
                 updateBeneficioContact(id_emisor, id_receptor, tipo, cantidad, usuario, grupo)
-
             });
-
             /*end compartir */
-
         }
 
     });
 
 }
-
-
-
 function updateBeneficioContact(id_emisor, id_receptor, tipo, cantidad, usuario, grupo){
 
     console.log(cantidad);
@@ -1336,22 +1158,94 @@ function updateBeneficioContact(id_emisor, id_receptor, tipo, cantidad, usuario,
     });          
 
 }
-
-
-
+/** google contacts api **/
+function googleContConnet(){
+    var clientId = '581739469006-kfa7otlqsi2gp4m7qrqn9e6bi0np1f0t.apps.googleusercontent.com';
+    var apiKey = '3rYKdYLEHL4b7pM87OUVOeDu';
+    var scopes = 'https://www.googleapis.com/auth/contacts.readonly';
+    gapi.client.setApiKey(apiKey);
+    window.setTimeout(authorize);
+    function authorize() {
+        gapi.auth.authorize({client_id: clientId, scope: scopes, immediate: false}, handleAuthorization);
+    }
+}
+function handleAuthorization(authorizationResult) {
+    if (authorizationResult && !authorizationResult.error) {
+        $.get("https://www.google.com/m8/feeds/contacts/default/thin?alt=json&access_token=" + authorizationResult.access_token + "&max-results=100&v=3.0",
+        function(response){
+            //process the response here
+            console.log(response.feed.entry);
+            var contador = 100;
+            $.each(response.feed.entry,function(index,value){
+                contador = contador - 1;
+                //var correo = value.gd$email[0].address;
+                //var nombre = value.gd$name.gd$fullName;
+                var correo;
+                var nombre;
+                var id_google = value.id.$t;
+                //var id = id_google.replace('http://www.google.com/m8/feeds/contacts/nexuscode25%40gmail.com/base/','');
+                //console.log(id); 
+                if (typeof (value.gd$name) != "undefined") {
+                    if (typeof (value.gd$name.gd$fullName) != "undefined") {
+                        if (typeof (value.gd$name.gd$fullName.$t) != "undefined") {
+                            nombre = value.gd$name.gd$fullName.$t;
+                        }
+                    }else if(typeof (value.gd$name.gd$givenName) != "undefined"){
+                        if (typeof (value.gd$name.gd$givenName.$t) != "undefined") {
+                            nombre = value.gd$name.gd$givenName.$t;
+                        }                     
+                    }
+                }else{
+                    nombre = value.gd$email[0].address;
+                }
+                var image = value.link[1].href;
+                var link = value.link.filter(function(link) {
+                    return link.type.indexOf("image") === 0;
+                }).shift();
+                getPhoto(link.href, authorizationResult.access_token, nombre, id_google, acallback, contador);
+            });
+        });
+    }
+}
+function getPhoto(url, token, nombre, id_google, callback, contador) {
+    var request = new XMLHttpRequest();
+    request.open("GET", url+ "&access_token=" + token, true);
+    request.responseType = 'blob';
+    request.onload = function(e) {
+        if (this.status == 200) {
+            var url = webkitURL.createObjectURL(this.response);
+            //console.log(this.response.size);
+            callback(url, nombre, id_google);
+        }
+        if (this.status == 404) {
+            throw new Error(' replied 404');
+        }
+    };
+    request.send();
+}
+function acallback(urlphoto, nombre, id_google) {
+    var html2 ="";  
+    html2 += '<tr class="row-contact"><td class="py-1"><img src="'+urlphoto+'" class="card-img-top" alt="mancha-logo"></td><td>'+nombre+'</td><td class="add-miembro" data-avatar="'+urlphoto+'" data-nombre="'+nombre+'" data-id="'+id_google+'" style="text-align:center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus-circle" data-darkreader-inline-fill="" data-darkreader-inline-stroke="" style="--darkreader-inline-fill:none; --darkreader-inline-stroke:currentColor;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg></td></tr>';
+    $("#dataTableGoogleCon tbody").append(html2);
+}  
+/*filtrado de contactos registrados*/
+function getMiembroNotContact(){
+    $(".container-miembros").each(function(){
+        var miembro = $(this).find(".mancha-miembro-menu").data('id');
+        console.log(miembro);
+        //temp.push(txt);
+	});
+    $("#dataTableGoogleCon tbody").find(".add-miembro").each(function(){
+        console.log($(this).attr('data-id'));
+    });
+}
 /*tab*/
-
-$('.tab ul.tabs').addClass('active').find('> li:eq(0)').addClass('current');
-
-		
-
+$('.tab ul.tabs').addClass('active').find('> li:eq(0)').addClass('current');	
 $('.tab ul.tabs li a').click(function (g){ 
 
     var tab = $(this).closest('.tab'), 
 
         index = $(this).closest('li').index();
-
-    
 
     tab.find('ul.tabs > li').removeClass('current');
 
@@ -1363,16 +1257,8 @@ $('.tab ul.tabs li a').click(function (g){
 
     tab.find('.tab_content').find('div.tabs_item:eq(' + index + ')').slideDown();
 
-    
-
     g.preventDefault();
 
 });
-
-
-
-
-
 </script>
-
 @endsection

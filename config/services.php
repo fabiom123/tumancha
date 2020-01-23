@@ -30,4 +30,11 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'google' => [
+        'client_id' => '746858658408-02df3c6iuqa81hvb3deketkfodnh4ud3.apps.googleusercontent.com', // your client_id form google console
+        'client_secret' => 'c5Y8zVbK4bbWDwBnz3MQCnCP', // your client_secret form google console
+        'redirect' => 'http://localhost:8000',
+        'scope'         => ['userinfo_email', 'userinfo_profile', 'https://www.google.com/m8/feeds/'],
+    ],
+
 ];

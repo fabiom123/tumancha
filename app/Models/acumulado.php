@@ -18,4 +18,11 @@ class acumulado extends Model{
         return DB::table('acumulado')
         ->get();
     }
+    static public function get_acumulado_by_grupo($codigo, $tipo, $fecha_ini, $fecha_fin){
+        return DB::table('acumulado')
+        ->WhereBetween('updated_at', [$fecha_ini, $fecha_fin])
+        ->where('codigo', '=', intval($codigo))
+        ->Where('tipo', '=', $tipo)
+        ->get();
+    }
 }

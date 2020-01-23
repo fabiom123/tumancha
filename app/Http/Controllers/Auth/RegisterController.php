@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use App\Providers\RouteServiceProvider;
 use App\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use File;
+use Storage;
 
 class RegisterController extends Controller
 {
@@ -40,7 +43,6 @@ class RegisterController extends Controller
     {
         $this->middleware('guest');
     }
-
     /**
      * Get a validator for an incoming registration request.
      *
@@ -51,8 +53,9 @@ class RegisterController extends Controller
     {
         return Validator::make($data, [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            //'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            //'telefono' => ['required', 'string', 'max:255', 'unique:users'],
+            //'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
     }
 
@@ -64,10 +67,25 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        return User::create([
+        //$input = $data->all();
+        
+        if (is_file($data["url_image"])) {
+            $filename = $data["url_image"]->getClientOriginalName();
+            $file = file_get_contents($data["url_image"]->getRealPath());
+            Storage::disk('usuario')->put($filename, $file);
+            $data['url_image'] = $filename;
+        }
+        
+        $create = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
+            'telefono' => $data['telefono'],
+            'dni' => $data['dni'],
+            'url_image' => $data['url_image'],
+            'roles_id' => $data['roles_id'],
             'password' => Hash::make($data['password']),
         ]);
-    }
+
+        return $create;
+    }  
 }

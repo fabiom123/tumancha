@@ -11,7 +11,7 @@ use File;
 class plan extends Model{
     protected $table = 'plan';
 
-    protected $fillable = ['id_plan','nombre','id_contacto','megas','minutos','sms'];
+    protected $fillable = ['id_plan','nombre','dni','id_contacto','megas','minutos','sms'];
 
     static public function get_plan(){
         return DB::table('plan')

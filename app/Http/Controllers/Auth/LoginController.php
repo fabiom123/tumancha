@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use App\User;
+use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
@@ -36,5 +38,25 @@ class LoginController extends Controller
     public function __construct()
     {
         $this->middleware('guest')->except('logout');
+    }
+
+    public function loginUser()
+    {
+        // $data = \Request::all();
+        $telefono = \Request::input('telefono');
+        //var_dump($telefono);exit;
+        if ( !isset($telefono)) {
+            // Bad Creds. No access!
+            return redirect('/login');
+        } else {
+
+            $user = User::where('telefono', $telefono)->first();
+            //var_dump($user);exit;
+            if ($user) {
+            Auth::login($user);
+            return redirect()->intended('/');
+            } else {/* No User Found? */}
+
+        }
     }
 }
