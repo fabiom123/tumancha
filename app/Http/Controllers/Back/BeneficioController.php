@@ -30,8 +30,34 @@ class BeneficioController extends Controller{
                 /* encontrar meta por grupo */
                 foreach($beneficios as $key => $beneficio){
                     if($beneficio->miembros <= $miembros_grupo){ 
+                        if($beneficio->tipo == "masivo"){
+                            $acumulado_grupox = acumulado::get_acumulado_by_grupo($grupo, $tipo, date($beneficio->fecha_inicio), date($beneficio->fecha_fin));
+                            
+                            $megasx = 0;
+                            $smsx = 0;
+                            $minutosx = 0;
+                            $megas_altax = 0; 
+                            foreach ($acumulado_grupox as $key => $valuex) {
+                                $megasx += $valuex->megas;
+                                $smsx += $valuex->sms;
+                                $minutosx += $valuex->minutos;
+                                $megas_altax += $valuex->megas_alta;
+                            }
+                            if($beneficio->megas <= $megasx && $beneficio->sms <= $smsx && $beneficio->minutos <= $minutosx && $beneficio->megas_alta <= $megas_altax){
+                                $lista_beneficios[] = $beneficio;
+                            }
+                            $megasx = 0;
+                            $smsx = 0;
+                            $minutosx = 0;
+                            $megas_altax = 0;
+                        }
+                    }
+                }
+                break;
+            case "persona":
+                foreach($beneficios as $key => $beneficio){
+                    if($beneficio->tipo == "personal" || $beneficio->tipo == "personalizado"){
                         $acumulado_grupox = acumulado::get_acumulado_by_grupo($grupo, $tipo, date($beneficio->fecha_inicio), date($beneficio->fecha_fin));
-                        
                         $megasx = 0;
                         $smsx = 0;
                         $minutosx = 0;
@@ -50,29 +76,6 @@ class BeneficioController extends Controller{
                         $minutosx = 0;
                         $megas_altax = 0;
                     }
-                }
-                break;
-            case "persona":
-                foreach($beneficios as $key => $beneficio){
-                        $acumulado_grupox = acumulado::get_acumulado_by_grupo($grupo, $tipo, date($beneficio->fecha_inicio), date($beneficio->fecha_fin));
-                        
-                        $megasx = 0;
-                        $smsx = 0;
-                        $minutosx = 0;
-                        $megas_altax = 0; 
-                        foreach ($acumulado_grupox as $key => $valuex) {
-                            $megasx += $valuex->megas;
-                            $smsx += $valuex->sms;
-                            $minutosx += $valuex->minutos;
-                            $megas_altax += $valuex->megas_alta;
-                        }
-                        if($beneficio->megas <= $megasx && $beneficio->sms <= $smsx && $beneficio->minutos <= $minutosx && $beneficio->megas_alta <= $megas_altax){
-                            $lista_beneficios[] = $beneficio;
-                        }
-                        $megasx = 0;
-                        $smsx = 0;
-                        $minutosx = 0;
-                        $megas_altax = 0;
                 }
         }
         //var_dump($categoria);exit;

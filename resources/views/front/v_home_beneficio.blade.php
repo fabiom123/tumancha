@@ -17,30 +17,82 @@
             </div>
 
             <div class="d-flex flex-column">
-              <?php foreach ($lista_beneficios as $beneficio){?>
+              <?php 
+                $cont = 0;
+                foreach ($lista_beneficios as $beneficio){
+                        if ($beneficio->tipo == "personal") {?>
+                          <a href="#" class="beneficio-item border-bottom pb-3">
 
-                <a href="#" class="beneficio-item border-bottom pb-3">
+                            <div class="mr-3">
 
-                  <div class="mr-3">
+                              <img src="{{ asset('assets/images/beneficio/'.$beneficio->url_beneficio) }}" class="rounded-circle wd-60" alt="user">
 
-                    <img src="{{ asset('assets/images/beneficio/'.$beneficio->url_beneficio) }}" class="rounded-circle wd-60" alt="user">
+                            </div>
 
-                  </div>
+                            <div class="w-100">
 
-                  <div class="w-100">
+                              <div class="d-flex justify-content-between">
 
-                    <div class="d-flex justify-content-between">
+                                <h6 class="text-body mb-2">{!! $beneficio->nombre !!}</h6>
 
-                      <h6 class="text-body mb-2">{!! $beneficio->nombre !!}</h6>
+                              </div>
 
-                    </div>
+                              <p class="text-muted tx-13">Hey! there I'm available...</p>
 
-                    <p class="text-muted tx-13">Hey! there I'm available...</p>
+                            </div>
 
-                  </div>
+                          </a>
+              <?php     } elseif ($beneficio->tipo == "personalizado") {
+                          $cont++;
+                          if ($cont <= 2) {?>
+                          <a href="#" class="beneficio-item border-bottom pb-3">
 
-                </a>
-              <?php } ?>
+                            <div class="mr-3">
+
+                              <img src="{{ asset('assets/images/beneficio/'.$beneficio->url_beneficio) }}" class="rounded-circle wd-60" alt="user">
+
+                            </div>
+
+                            <div class="w-100">
+
+                              <div class="d-flex justify-content-between">
+
+                                <h6 class="text-body mb-2">{!! $beneficio->nombre !!}</h6>
+                                <span class="badge badge-danger">Solo para ti</span> 
+                              </div>
+
+                              <p class="text-muted tx-13">Hey! there I'm available...</p>
+                              
+                            </div>
+
+                          </a>
+              <?php 
+                          }
+                        }else{ ?>
+                          <a href="#" class="beneficio-item border-bottom pb-3">
+
+                            <div class="mr-3">
+
+                              <img src="{{ asset('assets/images/beneficio/'.$beneficio->url_beneficio) }}" class="rounded-circle wd-60" alt="user">
+
+                            </div>
+
+                            <div class="w-100">
+
+                              <div class="d-flex justify-content-between">
+
+                                <h6 class="text-body mb-2">{!! $beneficio->nombre !!}</h6>
+
+                              </div>
+
+                              <p class="text-muted tx-13">Hey! there I'm available...</p>
+
+                            </div>
+
+                          </a>
+              <?php     }
+                }
+              ?>    
             </div>
 
         </div>
