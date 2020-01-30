@@ -20,6 +20,12 @@ class BeneficioController extends Controller{
         $categoria = "";
         //lista de beneificios aptos
         $lista_beneficios = array();
+        //lista de beneificios aptos
+        $lista_nobeneficios = array();
+        //flag para miembros
+        $flg_miembros = 1;
+        //flag para megas
+        $flg_megas = 1;
         //beneficio all
         $beneficios = beneficio::get_beneficio_meta();
         switch ($tipo) {
@@ -45,6 +51,36 @@ class BeneficioController extends Controller{
                             }
                             if($beneficio->megas <= $megasx && $beneficio->sms <= $smsx && $beneficio->minutos <= $minutosx && $beneficio->megas_alta <= $megas_altax){
                                 $lista_beneficios[] = $beneficio;
+                            }
+                            $megasx = 0;
+                            $smsx = 0;
+                            $minutosx = 0;
+                            $megas_altax = 0;
+                        }
+                    }else{
+                        $flg_miembros = 0;
+                        if($beneficio->tipo == "masivo"){
+                            $acumulado_grupox = acumulado::get_acumulado_by_grupo($grupo, $tipo, date($beneficio->fecha_inicio), date($beneficio->fecha_fin));
+                            
+                            $megasx = 0;
+                            $smsx = 0;
+                            $minutosx = 0;
+                            $megas_altax = 0; 
+                            foreach ($acumulado_grupox as $key => $valuex) {
+                                $megasx += $valuex->megas;
+                                $smsx += $valuex->sms;
+                                $minutosx += $valuex->minutos;
+                                $megas_altax += $valuex->megas_alta;
+                            }
+                            if($beneficio->megas <= $megasx && $beneficio->sms <= $smsx && $beneficio->minutos <= $minutosx && $beneficio->megas_alta <= $megas_altax){
+                                $beneficio->status_miembros = $flg_miembros;
+                                $beneficio->status_megas = $flg_megas;
+                                $lista_nobeneficios[] = $beneficio;
+                            }else{
+                                $flg_megas = 0;
+                                $beneficio->status_miembros = $flg_miembros;
+                                $beneficio->status_megas = $flg_megas;
+                                $lista_nobeneficios[] = $beneficio;
                             }
                             $megasx = 0;
                             $smsx = 0;
@@ -78,9 +114,10 @@ class BeneficioController extends Controller{
                     }
                 }
         }
-        //var_dump($categoria);exit;
+        //var_dump($lista_nobeneficios);exit;
         return view ('front.v_home_beneficio',[
             'lista_beneficios' => $lista_beneficios,
+            'lista_nobeneficios' => $lista_nobeneficios,
             'tipo'  =>  $tipo,
             'grupo'	=>	$grupo,
             'categoria' => $categoria
